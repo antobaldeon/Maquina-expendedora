@@ -1,271 +1,1009 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Máquina Expendedora - AFD</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Máquina Expendedora - FSM Completa</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-  <link rel="stylesheet" href="css/styles.css">
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        .products-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 25px;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        .product-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            border-color: #667eea;
+        }
+
+        .product-card.selected {
+            border-color: #10b981;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+        }
+
+        .product-card.out-of-stock {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .product-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .product-code {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .product-name {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .product-price {
+            color: #10b981;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .product-stock {
+            background: #6b7280;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            display: inline-block;
+        }
+
+        .control-panel {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .current-state {
+            background: linear-gradient(135deg, #065f46 0%, #047857 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .current-state h3 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .current-state .state-text {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .current-state .state-desc {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .selected-product-info {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .selected-product-info h3 {
+            margin-bottom: 15px;
+            color: #374151;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .info-label {
+            color: #6b7280;
+        }
+
+        .info-value {
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .amount-display {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .amount-box {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .amount-box label {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 5px;
+        }
+
+        .amount-box .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #10b981;
+        }
+
+        .coins-section {
+            background: #f3f4f6;
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .coins-section h3 {
+            margin-bottom: 15px;
+            color: #374151;
+        }
+
+        .coins-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+
+        .coin-btn {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .coin-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .coin-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .btn-collect {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+
+        .btn-collect:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-cancel {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .history-section {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .history-section h4 {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+
+        .coin-history {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+
+        .coin-tag {
+            background: #667eea;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .change-section {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .change-section h4 {
+            margin-bottom: 10px;
+            color: #374151;
+        }
+
+        .change-breakdown {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .change-item {
+            padding: 5px 0;
+            color: #374151;
+        }
+
+        .delivery-tray {
+            background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .fsm-section {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .product-fsm {
+            margin-bottom: 40px;
+            border: 2px solid #e5e7eb;
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .product-fsm-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .fsm-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .fsm-tab {
+            padding: 10px 20px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #6b7280;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .fsm-tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .fsm-content {
+            padding: 20px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        .state-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+
+        .state-table th,
+        .state-table td {
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            text-align: center;
+        }
+
+        .state-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 600;
+        }
+
+        .state-table tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .state-table tr:hover {
+            background: #fef3c7;
+        }
+
+        .state-table .initial-state {
+            background: #dbeafe !important;
+            font-weight: bold;
+        }
+
+        .state-table .final-state {
+            background: #d1fae5 !important;
+            font-weight: bold;
+        }
+
+        .graph-container {
+            background: #f9fafb;
+            border-radius: 10px;
+            padding: 20px;
+            overflow-x: auto;
+            max-height: 600px;
+        }
+
+        .graph-legend {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 30px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .alert-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-  <header class="app-header text-center py-4">
-    <h1 class="m-0">
-      <i class="bi bi-cup-straw"></i>
-      Máquina Expendedora
-    </h1>
-    <p class="m-0 text-light-emphasis">Simulación de un Autómata Finito Determinista</p>
-  </header>
-
-  <main class="container my-4">
-    <section class="row g-4">
-      <div class="col-lg-7">
-        <div class="panel h-100">
-          <div class="panel-header">
-            <i class="bi bi-grid-3x3-gap-fill"></i>
-            Productos disponibles
-          </div>
-          <div class="panel-body">
-            <div id="grid-productos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
-          </div>
+    <div class="container">
+        <div class="products-section">
+            <h1> Productos disponibles</h1>
+            <div class="products-grid" id="productsGrid"></div>
         </div>
-      </div>
 
-      <div class="col-lg-5">
-        <div class="maquina-panel">
-          <div class="lcd mb-3">
-            <div class="lcd-label">Estado actual</div>
-            <div id="estado-actual" class="lcd-texto">INICIO</div>
-            <div id="lcd-pantalla" class="lcd-subtexto">Seleccione un producto</div>
-          </div>
-
-          <div class="info-box mb-3">
-            <label class="form-label fw-bold">Producto seleccionado</label>
-            <div id="producto-seleccionado" class="selected-box">
-              Ninguno
+        <div class="control-panel">
+            <div class="current-state">
+                <h3>ESTADO ACTUAL</h3>
+                <div class="state-text" id="currentState">Esperando selección</div>
+                <div class="state-desc" id="stateDesc">Seleccione un producto</div>
             </div>
-          </div>
 
-          <div class="row g-3 mb-3">
-            <div class="col-6">
-              <div class="metric">
-                <span>Monto acumulado</span>
-                <strong id="dinero-ingresado">S/ 0.00</strong>
-              </div>
+            <div id="alertContainer" class="alert"></div>
+
+            <div class="selected-product-info">
+                <h3>Producto seleccionado</h3>
+                <div id="selectedProductInfo">
+                    <p style="color: #6b7280; text-align: center;">Sin producto seleccionado</p>
+                </div>
             </div>
-            <div class="col-6">
-              <div class="metric">
-                <span>Cambio calculado</span>
-                <strong id="cambio-calculado">S/ 0.00</strong>
-              </div>
+
+            <div class="amount-display">
+                <div class="amount-box">
+                    <label>Monto acumulado</label>
+                    <div class="value" id="accumulatedAmount">S/ 0.00</div>
+                </div>
+                <div class="amount-box">
+                    <label>Cambio calculado</label>
+                    <div class="value" id="calculatedChange">S/ 0.00</div>
+                </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold">Insertar monedas</label>
-            <div id="botones-dinero" class="money-grid"></div>
-          </div>
-
-          <div class="d-grid gap-2 mb-3">
-            <button id="btn-recoger" class="btn btn-success btn-lg" disabled>
-              <i class="bi bi-box-arrow-down"></i>
-              Recoger producto
-            </button>
-            <button id="btn-cancelar" class="btn btn-outline-danger">
-              <i class="bi bi-x-circle"></i>
-              Cancelar compra
-            </button>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">
-              <i class="bi bi-clock-history"></i>
-              Historial de monedas ingresadas
-            </label>
-            <div id="historial-monedas" class="output-box">
-              Sin monedas ingresadas.
+            <div class="coins-section">
+                <h3>Insertar monedas</h3>
+                <div class="coins-grid">
+                    <button class="coin-btn" onclick="insertCoin(0.10)">S/0.10</button>
+                    <button class="coin-btn" onclick="insertCoin(0.20)">S/0.20</button>
+                    <button class="coin-btn" onclick="insertCoin(0.50)">S/0.50</button>
+                    <button class="coin-btn" onclick="insertCoin(1.00)">S/1.00</button>
+                    <button class="coin-btn" onclick="insertCoin(2.00)">S/2.00</button>
+                    <button class="coin-btn" onclick="insertCoin(5.00)">S/5.00</button>
+                </div>
             </div>
-          </div>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold">
-              <i class="bi bi-cash-coin"></i>
-              Monedas para cambio
-            </label>
-            <div id="panel-vuelto" class="output-box">
-              S/ 0.00
+            <div class="action-buttons">
+                <button class="btn btn-collect" id="collectBtn" onclick="collectProduct()" disabled>
+                    📦 Recoger producto
+                </button>
+                <button class="btn btn-cancel" onclick="cancelPurchase()">
+                    ❌ Cancelar compra
+                </button>
             </div>
-          </div>
 
-          <div>
-            <label class="form-label fw-bold">
-              <i class="bi bi-bag-check"></i>
-              Bandeja de entrega
-            </label>
-            <div id="bandeja-entrega" class="output-box">
-              Vacía.
+            <div class="history-section">
+                <h4>⏱ Historial de monedas ingresadas</h4>
+                <div class="coin-history" id="coinHistory"></div>
             </div>
-          </div>
+
+            <div class="change-section" id="changeSection" style="display: none;">
+                <h4>💰 Monedas para cambio</h4>
+                <div class="change-breakdown" id="changeBreakdown"></div>
+            </div>
+
+            <div class="delivery-tray">
+                <div id="deliveryTray">Vacía.</div>
+            </div>
         </div>
-      </div>
-    </section>
 
-    <section id="afd-section" class="afd-section mt-4 d-none">
-      <div class="academic-panel">
-        <h2>Planteamiento del problema</h2>
-        <p>
-          Se desea modelar el funcionamiento de una máquina expendedora mediante un
-          Autómata Finito Determinista. La máquina vende seis productos, acepta únicamente
-          monedas peruanas de S/0.10, S/0.20, S/0.50, S/1.00, S/2.00 y S/5.00, acumula
-          el monto ingresado y permite recoger el producto solo cuando el pago ha sido
-          completado. Si el monto ingresado supera el precio, el sistema calcula el cambio
-          usando la menor cantidad posible de monedas.
-        </p>
-
-        <h2>Definición formal del AFD</h2>
-        <p>
-          El autómata se define como M = (Q, Σ, δ, q0, F).
-        </p>
-
-        <ul>
-          <li><strong>Q:</strong> {INICIO, PRODUCTO_SELECCIONADO, ACUMULANDO_DINERO, PAGO_COMPLETADO, CAMBIO_CALCULADO, PRODUCTO_LISTO, ENTREGA_PRODUCTO, ENTREGA_CAMBIO, REINICIO}</li>
-          <li><strong>Σ:</strong> {seleccionar_producto, moneda_0_10, moneda_0_20, moneda_0_50, moneda_1_00, moneda_2_00, moneda_5_00, recoger_producto, cancelar}</li>
-          <li><strong>δ:</strong> función de transición que determina el siguiente estado según el estado actual y la entrada recibida.</li>
-          <li><strong>q0:</strong> INICIO.</li>
-          <li><strong>F:</strong> {PRODUCTO_LISTO, ENTREGA_PRODUCTO, ENTREGA_CAMBIO}.</li>
-        </ul>
-
-        <p class="note">
-          Nota académica: el AFD controla los estados del proceso. El cálculo exacto del
-          monto acumulado y del cambio requiere memoria numérica adicional, por lo que esa
-          parte corresponde a la lógica del programa. El autómata representa el flujo de
-          control de la máquina.
-        </p>
-      </div>
-
-      <div class="row g-4 mt-1">
-  <div class="col-12">
-    <div class="academic-panel">
-      <h2>Grafo de estados</h2>
-      <div id="mermaid-container" class="mermaid-box"></div>
+        <div class="fsm-section">
+            <h2 style="margin-bottom: 20px;">📊 Máquinas de Estado Finito por Producto</h2>
+            <div id="fsmContainer"></div>
+        </div>
     </div>
-  </div>
 
-  <div class="col-12">
-    <div class="academic-panel">
-      <h2>Tabla completa de transiciones</h2>
-      <div class="table-responsive">
-        <table class="table table-bordered table-sm align-middle transition-table">
-                <thead>
-  <tr>
-    <th rowspan="2">Estado<br><small>cantidad depositada</small></th>
-    <th colspan="6">Moneda insertada entrada</th>
-    <th rowspan="2">Recoger producto</th>
-    <th rowspan="2">Cancelar</th>
-  </tr>
-  <tr>
-    <th>S/ 0.10</th>
-    <th>S/ 0.20</th>
-    <th>S/ 0.50</th>
-    <th>S/ 1.00</th>
-    <th>S/ 2.00</th>
-    <th>S/ 5.00</th>
-  </tr>
-</thead>
-<tbody id="tabla-transiciones"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      </div>
+    <script>
+        const products = [
+            { code: 'A1', name: 'Agua', price: 2.00, stock: 5, icon: '💧', color: '#3b82f6' },
+            { code: 'A2', name: 'Gaseosa', price: 3.50, stock: 4, icon: '🥤', color: '#ef4444' },
+            { code: 'A3', name: 'Jugo', price: 3.00, stock: 4, icon: '🧃', color: '#f59e0b' },
+            { code: 'B1', name: 'Café', price: 2.80, stock: 3, icon: '☕', color: '#8b5cf6' },
+            { code: 'B2', name: 'Energizante', price: 4.70, stock: 3, icon: '⚡', color: '#10b981' },
+            { code: 'B3', name: 'Té', price: 1.60, stock: 6, icon: '🍵', color: '#ec4899' }
+        ];
 
-      <div class="academic-panel mt-4">
-        <h2>Casos de prueba</h2>
-        <div class="table-responsive">
-          <table class="table table-striped table-bordered align-middle">
-            <thead>
-              <tr>
-                <th>Producto</th>
-                <th>Precio</th>
-                <th>Monedas ingresadas</th>
-                <th>Monto</th>
-                <th>Cambio</th>
-                <th>Monedas entregadas</th>
-                <th>Estado final</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>Agua</td>
-                <td>S/ 2.00</td>
-                <td>S/1.00 + S/1.00</td>
-                <td>S/ 2.00</td>
-                <td>S/ 0.00</td>
-                <td>No hay cambio</td>
-                <td>INICIO</td>
-              </tr>
-              <tr>
-                <td>Gaseosa</td>
-                <td>S/ 3.50</td>
-                <td>S/5.00</td>
-                <td>S/ 5.00</td>
-                <td>S/ 1.50</td>
-                <td>1 moneda de S/1.00, 1 moneda de S/0.50</td>
-                <td>INICIO</td>
-              </tr>
-              <tr>
-                <td>Jugo</td>
-                <td>S/ 3.00</td>
-                <td>S/2.00 + S/1.00</td>
-                <td>S/ 3.00</td>
-                <td>S/ 0.00</td>
-                <td>No hay cambio</td>
-                <td>INICIO</td>
-              </tr>
-              <tr>
-                <td>Café</td>
-                <td>S/ 2.80</td>
-                <td>S/2.00 + S/1.00</td>
-                <td>S/ 3.00</td>
-                <td>S/ 0.20</td>
-                <td>1 moneda de S/0.20</td>
-                <td>INICIO</td>
-              </tr>
-              <tr>
-                <td>Energizante</td>
-                <td>S/ 4.70</td>
-                <td>S/5.00</td>
-                <td>S/ 5.00</td>
-                <td>S/ 0.30</td>
-                <td>1 moneda de S/0.20, 1 moneda de S/0.10</td>
-                <td>INICIO</td>
-              </tr>
-              <tr>
-                <td>Té</td>
-                <td>S/ 1.60</td>
-                <td>S/1.00 + S/0.50 + S/0.20</td>
-                <td>S/ 1.70</td>
-                <td>S/ 0.10</td>
-                <td>1 moneda de S/0.10</td>
-                <td>INICIO</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
+        const coinValues = [0.10, 0.20, 0.50, 1.00, 2.00, 5.00];
+        const coinLabels = ['0.10', '0.20', '0.50', '1', '2', '5'];
+        const MAX_AMOUNT = 5.00;
 
-  <footer class="text-center py-3 text-light-emphasis">
-    <small>Proyecto académico - Matemática Discreta - AFD</small>
-  </footer>
+        let currentState = 'WAITING_SELECTION';
+        let selectedProduct = null;
+        let accumulatedAmount = 0;
+        let coinHistory = [];
+        let changeCoins = [];
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+        const states = {
+            WAITING_SELECTION: 'Esperando selección',
+            PRODUCT_SELECTED: 'Producto seleccionado',
+            COLLECTING_COINS: 'Recolectando monedas',
+            READY_TO_COLLECT: 'Listo para recoger',
+            DISPENSING_PRODUCT: 'Entregando producto',
+            RETURNING_CHANGE: 'Devolviendo cambio'
+        };
 
-  <script src="js/productos.js"></script>
-  <script src="js/vuelto.js"></script>
-  <script src="js/app.js"></script>
+        mermaid.initialize({ 
+            startOnLoad: false,
+            theme: 'default',
+            securityLevel: 'loose'
+        });
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid');
+            grid.innerHTML = products.map(product => `
+                <div class="product-card ${product.stock === 0 ? 'out-of-stock' : ''} ${selectedProduct?.code === product.code ? 'selected' : ''}" 
+                     onclick="selectProduct('${product.code}')"
+                     id="product-${product.code}">
+                    <div class="product-icon">${product.icon}</div>
+                    <div class="product-code">${product.code}</div>
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-price">S/ ${product.price.toFixed(2)}</div>
+                    <div class="product-stock">Stock: ${product.stock}</div>
+                </div>
+            `).join('');
+        }
+
+        function generateAllStates() {
+            const states = [];
+            for (let amount = 0; amount <= MAX_AMOUNT; amount += 0.10) {
+                amount = Math.round(amount * 100) / 100;
+                if (!states.includes(amount)) {
+                    states.push(amount);
+                }
+            }
+            return states;
+        }
+
+        function getNextStateAmount(currentAmount, coin) {
+            const newAmount = currentAmount + coin;
+            if (newAmount > MAX_AMOUNT) {
+                return MAX_AMOUNT;
+            }
+            return Math.round(newAmount * 100) / 100;
+        }
+
+        function formatAmount(amount) {
+            if (amount < 1) {
+                return `${Math.round(amount * 100)}¢`;
+            }
+            return `S/ ${amount.toFixed(2)}`;
+        }
+
+        function generateTransitionTable(product) {
+            const states = generateAllStates().filter(s => s <= product.price);
+            
+            let html = '<table class="state-table">';
+            html += '<thead><tr><th>Estado Actual \\ Entrada</th>';
+            coinLabels.forEach(label => {
+                html += `<th>S/ ${label}</th>`;
+            });
+            html += '</tr></thead><tbody>';
+
+            states.forEach(amount => {
+                const isInitialState = amount === 0;
+                const isFinalState = amount >= product.price;
+                const rowClass = isInitialState ? 'initial-state' : (isFinalState ? 'final-state' : '');
+                
+                html += `<tr class="${rowClass}">`;
+                html += `<td><strong>${formatAmount(amount)}</strong> ${isInitialState ? '(q₀)' : ''} ${isFinalState ? '✓' : ''}</td>`;
+                
+                if (isFinalState) {
+                    html += `<td colspan="6">PRODUCTO ENTREGADO</td>`;
+                } else {
+                    coinValues.forEach(coin => {
+                        const nextAmount = getNextStateAmount(amount, coin);
+                        const nextIsFinal = nextAmount >= product.price;
+                        const cellClass = nextIsFinal ? 'final-state' : '';
+                        html += `<td class="${cellClass}">${formatAmount(nextAmount)} ${nextIsFinal ? '✓' : ''}</td>`;
+                    });
+                }
+                
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            return html;
+        }
+
+        function generateGraphForProduct(product) {
+            const allStates = generateAllStates();
+            let mermaidCode = 'graph LR\n';
+            
+            // Definir clases de estilo para cada producto
+            mermaidCode += `    classDef productHighlight stroke:${product.color},stroke-width:4px;\n`;
+            mermaidCode += '    classDef initialState fill:#dbeafe,stroke:#3b82f6,stroke-width:3px;\n';
+            mermaidCode += '    classDef intermediateState fill:#f3f4f6,stroke:#6b7280,stroke-width:2px;\n';
+            mermaidCode += '    classDef finalState fill:#d1fae5,stroke:#10b981,stroke-width:3px;\n\n';
+
+            // Crear nodos (solo mostrar cada 0.50 para no saturar)
+            const displayStates = allStates.filter((_, i) => i % 5 === 0 || i === allStates.length - 1);
+            
+            displayStates.forEach(amount => {
+                const stateId = `q${Math.round(amount * 100)}`;
+                const label = formatAmount(amount);
+                
+                if (amount === 0) {
+                    mermaidCode += `    ${stateId}["${label}"]:::initialState\n`;
+                } else if (amount >= product.price) {
+                    mermaidCode += `    ${stateId}["${label} ✓"]:::finalState\n`;
+                } else {
+                    mermaidCode += `    ${stateId}["${label}"]:::intermediateState\n`;
+                }
+            });
+
+            mermaidCode += '\n';
+
+            // Crear transiciones (solo mostrar las principales)
+            const transitionStates = allStates.filter((_, i) => i % 5 === 0);
+            
+            transitionStates.forEach(amount => {
+                if (amount >= MAX_AMOUNT) return;
+                
+                const stateId = `q${Math.round(amount * 100)}`;
+                
+                coinValues.forEach(coin => {
+                    const nextAmount = getNextStateAmount(amount, coin);
+                    const nextStateId = `q${Math.round(nextAmount * 100)}`;
+                    
+                    // Resaltar flechas que llegan al precio del producto
+                    if (nextAmount === product.price || (amount < product.price && nextAmount >= product.price)) {
+                        mermaidCode += `    ${stateId} -->|"S/ ${coin}"| ${nextStateId}\n`;
+                    }
+                });
+            });
+
+            // Aplicar clase de resaltado al nodo del precio del producto
+            const priceNodeId = `q${Math.round(product.price * 100)}`;
+            mermaidCode += `    class ${priceNodeId} productHighlight;\n`;
+
+            return mermaidCode;
+        }
+
+        function generateAllFSM() {
+            const container = document.getElementById('fsmContainer');
+            container.innerHTML = '';
+
+            products.forEach(product => {
+                const fsmDiv = document.createElement('div');
+                fsmDiv.className = 'product-fsm';
+                
+                const header = document.createElement('div');
+                header.className = 'product-fsm-header';
+                header.style.background = `linear-gradient(135deg, ${product.color} 0%, #764ba2 100%)`;
+                header.innerHTML = `${product.icon} ${product.name} - S/ ${product.price.toFixed(2)}`;
+                fsmDiv.appendChild(header);
+
+                const tabs = document.createElement('div');
+                tabs.className = 'fsm-tabs';
+                tabs.innerHTML = `
+                    <button class="fsm-tab active" onclick="switchProductTab('${product.code}', 'table')">Tabla de Transición</button>
+                    <button class="fsm-tab" onclick="switchProductTab('${product.code}', 'graph')">Grafo de Estados</button>
+                `;
+                fsmDiv.appendChild(tabs);
+
+                const content = document.createElement('div');
+                content.className = 'fsm-content';
+                content.id = `fsm-content-${product.code}`;
+                
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'table-container';
+                tableContainer.id = `table-${product.code}`;
+                tableContainer.innerHTML = generateTransitionTable(product);
+                
+                const graphContainer = document.createElement('div');
+                graphContainer.className = 'graph-container';
+                graphContainer.id = `graph-${product.code}`;
+                graphContainer.style.display = 'none';
+                
+                content.appendChild(tableContainer);
+                content.appendChild(graphContainer);
+                fsmDiv.appendChild(content);
+                container.appendChild(fsmDiv);
+            });
+        }
+
+        window.switchProductTab = function(productCode, tab) {
+            const fsmContent = document.getElementById(`fsm-content-${productCode}`);
+            const tableContainer = document.getElementById(`table-${productCode}`);
+            const graphContainer = document.getElementById(`graph-${productCode}`);
+            const tabs = fsmContent.parentElement.querySelectorAll('.fsm-tab');
+
+            tabs.forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'table') {
+                tableContainer.style.display = 'block';
+                graphContainer.style.display = 'none';
+            } else {
+                tableContainer.style.display = 'none';
+                graphContainer.style.display = 'block';
+                
+                const product = products.find(p => p.code === productCode);
+                const mermaidCode = generateGraphForProduct(product);
+                graphContainer.innerHTML = `
+                    <div class="mermaid">${mermaidCode}</div>
+                    <div class="graph-legend">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #3b82f6;"></div>
+                            <span>Estado Inicial</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #6b7280;"></div>
+                            <span>Estados Intermedios</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #10b981;"></div>
+                            <span>Estado Final (≥ Precio)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: ${product.color};"></div>
+                            <span>Flechas resaltadas para ${product.name}</span>
+                        </div>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    try {
+                        mermaid.init(undefined, `#graph-${productCode} .mermaid`);
+                    } catch (error) {
+                        console.error('Error al generar grafo:', error);
+                    }
+                }, 100);
+            }
+        };
+
+        function selectProduct(code) {
+            const product = products.find(p => p.code === code);
+            if (!product || product.stock === 0) {
+                showAlert('Producto no disponible', 'error');
+                return;
+            }
+
+            selectedProduct = product;
+            accumulatedAmount = 0;
+            coinHistory = [];
+            changeCoins = [];
+            currentState = 'PRODUCT_SELECTED';
+            
+            updateUI();
+            showAlert(`Producto seleccionado: ${product.name} - S/ ${product.price.toFixed(2)}`, 'success');
+        }
+
+        function insertCoin(value) {
+            if (!selectedProduct) {
+                showAlert('Primero seleccione un producto', 'error');
+                return;
+            }
+
+            if (currentState === 'READY_TO_COLLECT' || currentState === 'DISPENSING_PRODUCT') {
+                showAlert('Primero recoja el producto actual', 'error');
+                return;
+            }
+
+            accumulatedAmount += value;
+            coinHistory.push(value);
+            
+            if (accumulatedAmount < selectedProduct.price) {
+                currentState = 'COLLECTING_COINS';
+                const remaining = selectedProduct.price - accumulatedAmount;
+                document.getElementById('stateDesc').textContent = `Falta: S/ ${remaining.toFixed(2)}`;
+            } else {
+                currentState = 'READY_TO_COLLECT';
+                calculateChange();
+                document.getElementById('stateDesc').textContent = 'Presione "Recoger producto"';
+            }
+
+            updateUI();
+        }
+
+        function calculateChange() {
+            const change = accumulatedAmount - selectedProduct.price;
+            changeCoins = [];
+            
+            const coinDenominations = [2.00, 1.00, 0.50, 0.20, 0.10];
+            let remaining = change;
+            
+            for (const denom of coinDenominations) {
+                while (remaining >= denom - 0.001) {
+                    changeCoins.push(denom);
+                    remaining -= denom;
+                    remaining = Math.round(remaining * 100) / 100;
+                }
+            }
+        }
+
+        function collectProduct() {
+            if (currentState !== 'READY_TO_COLLECT') {
+                showAlert('No hay producto listo para recoger', 'error');
+                return;
+            }
+
+            currentState = 'DISPENSING_PRODUCT';
+            updateUI();
+
+            setTimeout(() => {
+                selectedProduct.stock--;
+                const deliveryTray = document.getElementById('deliveryTray');
+                deliveryTray.innerHTML = `
+                    <div>
+                        <div style="font-size: 40px; margin-bottom: 10px;">${selectedProduct.icon}</div>
+                        <div style="font-weight: bold;">${selectedProduct.name}</div>
+                        <div style="font-size: 14px; opacity: 0.9;">¡Disfrútelo!</div>
+                    </div>
+                `;
+
+                if (changeCoins.length > 0) {
+                    currentState = 'RETURNING_CHANGE';
+                    document.getElementById('changeSection').style.display = 'block';
+                    renderChangeBreakdown();
+                } else {
+                    resetTransaction();
+                }
+
+                renderProducts();
+            }, 1500);
+        }
+
+        function renderChangeBreakdown() {
+            const breakdown = document.getElementById('changeBreakdown');
+            const coinCount = {};
+            
+            changeCoins.forEach(coin => {
+                coinCount[coin] = (coinCount[coin] || 0) + 1;
+            });
+
+            const totalChange = accumulatedAmount - selectedProduct.price;
+            
+            let html = `<div style="margin-bottom: 10px; font-weight: bold; color: #10b981;">
+                Cambio: S/ ${totalChange.toFixed(2)}
+            </div>`;
+            
+            Object.entries(coinCount).forEach(([denom, count]) => {
+                html += `<div class="change-item">
+                    • ${count} moneda${count > 1 ? 's' : ''} de S/ ${parseFloat(denom).toFixed(2)}
+                </div>`;
+            });
+
+            breakdown.innerHTML = html;
+        }
+
+        function cancelPurchase() {
+            if (!selectedProduct) return;
+            resetTransaction();
+            showAlert('Compra cancelada', 'error');
+        }
+
+        function resetTransaction() {
+            setTimeout(() => {
+                selectedProduct = null;
+                accumulatedAmount = 0;
+                coinHistory = [];
+                changeCoins = [];
+                currentState = 'WAITING_SELECTION';
+                
+                document.getElementById('deliveryTray').textContent = 'Vacía.';
+                document.getElementById('changeSection').style.display = 'none';
+                
+                updateUI();
+            }, 3000);
+        }
+
+        function updateUI() {
+            document.getElementById('currentState').textContent = states[currentState];
+            document.getElementById('accumulatedAmount').textContent = `S/ ${accumulatedAmount.toFixed(2)}`;
+            
+            const change = selectedProduct ? accumulatedAmount - selectedProduct.price : 0;
+            document.getElementById('calculatedChange').textContent = `S/ ${Math.max(0, change).toFixed(2)}`;
+            
+            const infoDiv = document.getElementById('selectedProductInfo');
+            if (selectedProduct) {
+                infoDiv.innerHTML = `
+                    <div class="info-row">
+                        <span class="info-label">Producto:</span>
+                        <span class="info-value">${selectedProduct.code} - ${selectedProduct.name}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label">Precio:</span>
+                        <span class="info-value">S/ ${selectedProduct.price.toFixed(2)}</span>
+                    </div>
+                `;
+            } else {
+                infoDiv.innerHTML = '<p style="color: #6b7280; text-align: center;">Sin producto seleccionado</p>';
+            }
+
+            const historyDiv = document.getElementById('coinHistory');
+            historyDiv.innerHTML = coinHistory.map(coin => 
+                `<span class="coin-tag">S/ ${coin.toFixed(2)}</span>`
+            ).join('');
+
+            document.getElementById('collectBtn').disabled = currentState !== 'READY_TO_COLLECT';
+            renderProducts();
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertContainer');
+            alert.textContent = message;
+            alert.className = `alert alert-${type}`;
+            alert.style.display = 'block';
+            
+            setTimeout(() => {
+                alert.style.display = 'none';
+            }, 3000);
+        }
+
+        renderProducts();
+        generateAllFSM();
+    </script>
 </body>
 </html>
