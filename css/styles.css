@@ -1,0 +1,115 @@
+/* ===========================================================
+   ESTILOS GENERALES - Simulación visual de máquina expendedora
+   =========================================================== */
+
+body {
+  background: linear-gradient(160deg, #1e2a38, #3b4a5a);
+  min-height: 100vh;
+  font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+/* --- Panel tipo máquina física --- */
+.maquina-panel {
+  border: 6px solid #2b2b2b;
+  border-radius: 16px;
+  background: #d9d9d9;
+}
+
+/* --- Pantalla LCD --- */
+.lcd {
+  background: #0b3d0b;
+  border: 3px solid #062b06;
+  border-radius: 6px;
+  padding: 12px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.6);
+}
+
+.lcd-texto {
+  font-family: 'Courier New', monospace;
+  color: #7CFC00;
+  text-align: center;
+  font-size: 1.05rem;
+  letter-spacing: 1px;
+  text-shadow: 0 0 5px #7CFC00;
+  min-height: 24px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* --- Tarjetas de producto --- */
+.producto-card {
+  cursor: pointer;
+  border: 2px solid #dee2e6;
+  border-radius: 10px;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s;
+  background: #fff;
+  height: 100%;
+}
+
+.producto-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+}
+
+.producto-card.seleccionado {
+  border-color: #198754;
+  box-shadow: 0 0 0 3px rgba(25,135,84,0.35);
+  background: #f0fff4;
+}
+
+.producto-card.sin-stock {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
+}
+
+.producto-img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+  margin: 0 auto;
+}
+
+.producto-codigo {
+  font-weight: bold;
+  color: #495057;
+  font-size: 0.8rem;
+}
+
+.stock-badge {
+  font-size: 0.7rem;
+}
+
+/* --- Botones de dinero --- */
+#botones-dinero {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.btn-dinero {
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+/* --- Animación de entrega de producto --- */
+@keyframes caerProducto {
+  0%   { transform: translateY(-40px); opacity: 0; }
+  70%  { transform: translateY(5px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
+.animar-entrega {
+  animation: caerProducto 0.5s ease-out;
+}
+
+/* --- Parpadeo de LCD al mostrar mensajes de error --- */
+@keyframes parpadeo {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.lcd-error {
+  color: #ff5555 !important;
+  text-shadow: 0 0 5px #ff5555 !important;
+  animation: parpadeo 0.6s ease-in-out 2;
+}
