@@ -1,122 +1,271 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Máquina Expendedora - Matemática Discreta</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Máquina Expendedora - AFD</title>
 
-<!-- Bootstrap 5 -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<!-- Bootstrap Icons -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
-<!-- CSS propio -->
-<link rel="stylesheet" href="css/styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
+  <header class="app-header text-center py-4">
+    <h1 class="m-0">
+      <i class="bi bi-cup-straw"></i>
+      Máquina Expendedora
+    </h1>
+    <p class="m-0 text-light-emphasis">Simulación de un Autómata Finito Determinista</p>
+  </header>
 
-<header class="text-center py-4 bg-dark text-white shadow">
-  <h1 class="m-0"><i class="bi bi-cup-straw"></i> Máquina Expendedora</h1>
-  <small class="text-secondary">Simulación de una máquina de estados finitos — Matemática Discreta</small>
-</header>
-
-<div class="container my-4">
-  <div class="row g-4">
-
-    <!-- ============ PANEL IZQUIERDO: PRODUCTOS ============ -->
-    <div class="col-lg-7">
-      <div class="card shadow-sm h-100">
-        <div class="card-header bg-secondary text-white">
-          <i class="bi bi-grid-3x3-gap-fill"></i> Productos disponibles
-        </div>
-        <div class="card-body">
-          <div id="grid-productos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
-            <!-- Las tarjetas de productos se generan dinámicamente con JS -->
+  <main class="container my-4">
+    <section class="row g-4">
+      <div class="col-lg-7">
+        <div class="panel h-100">
+          <div class="panel-header">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+            Productos disponibles
+          </div>
+          <div class="panel-body">
+            <div id="grid-productos" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3"></div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ============ PANEL DERECHO: MÁQUINA ============ -->
-    <div class="col-lg-5">
-      <div class="card shadow-sm maquina-panel">
-        <div class="card-body">
-
-          <!-- PANTALLA LCD -->
+      <div class="col-lg-5">
+        <div class="maquina-panel">
           <div class="lcd mb-3">
-            <div id="lcd-pantalla" class="lcd-texto">SELECCIONE UN PRODUCTO</div>
+            <div class="lcd-label">Estado actual</div>
+            <div id="estado-actual" class="lcd-texto">INICIO</div>
+            <div id="lcd-pantalla" class="lcd-subtexto">Seleccione un producto</div>
           </div>
 
-          <!-- PRODUCTO SELECCIONADO -->
-          <div class="mb-3">
-            <label class="form-label fw-bold text-muted">Producto seleccionado:</label>
-            <div id="producto-seleccionado" class="border rounded p-2 text-center bg-light">
-              <span class="text-muted">Ninguno</span>
+          <div class="info-box mb-3">
+            <label class="form-label fw-bold">Producto seleccionado</label>
+            <div id="producto-seleccionado" class="selected-box">
+              Ninguno
             </div>
           </div>
 
-          <!-- DINERO INGRESADO -->
+          <div class="row g-3 mb-3">
+            <div class="col-6">
+              <div class="metric">
+                <span>Monto acumulado</span>
+                <strong id="dinero-ingresado">S/ 0.00</strong>
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="metric">
+                <span>Cambio calculado</span>
+                <strong id="cambio-calculado">S/ 0.00</strong>
+              </div>
+            </div>
+          </div>
+
           <div class="mb-3">
-            <label class="form-label fw-bold text-muted">Dinero ingresado:</label>
-            <div id="dinero-ingresado" class="fs-4 fw-bold text-success text-center border rounded p-2 bg-light">
+            <label class="form-label fw-bold">Insertar monedas</label>
+            <div id="botones-dinero" class="money-grid"></div>
+          </div>
+
+          <div class="d-grid gap-2 mb-3">
+            <button id="btn-recoger" class="btn btn-success btn-lg" disabled>
+              <i class="bi bi-box-arrow-down"></i>
+              Recoger producto
+            </button>
+            <button id="btn-cancelar" class="btn btn-outline-danger">
+              <i class="bi bi-x-circle"></i>
+              Cancelar compra
+            </button>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+              <i class="bi bi-clock-history"></i>
+              Historial de monedas ingresadas
+            </label>
+            <div id="historial-monedas" class="output-box">
+              Sin monedas ingresadas.
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">
+              <i class="bi bi-cash-coin"></i>
+              Monedas para cambio
+            </label>
+            <div id="panel-vuelto" class="output-box">
               S/ 0.00
             </div>
           </div>
 
-          <!-- BOTONES DE MONEDAS/BILLETES -->
-          <div class="mb-3">
-            <label class="form-label fw-bold text-muted">Insertar dinero:</label>
-            <div id="botones-dinero" class="d-grid gap-2" style="grid-template-columns: repeat(4, 1fr);">
-              <!-- Botones generados por JS -->
-            </div>
-          </div>
-
-          <!-- ACCIONES -->
-          <div class="d-grid gap-2 mb-3">
-            <button id="btn-comprar" class="btn btn-success btn-lg">
-              <i class="bi bi-cart-check-fill"></i> Comprar
-            </button>
-            <button id="btn-cancelar" class="btn btn-outline-danger">
-              <i class="bi bi-x-circle"></i> Cancelar
-            </button>
-          </div>
-
-          <!-- BANDEJA DE ENTREGA -->
-          <div class="mb-3">
-            <label class="form-label fw-bold text-muted">
-              <i class="bi bi-box-arrow-down"></i> Bandeja de entrega:
-            </label>
-            <div id="bandeja-entrega" class="border rounded p-3 text-center bg-light">
-              <span class="text-muted">Vacía</span>
-            </div>
-          </div>
-
-          <!-- VUELTO -->
           <div>
-            <label class="form-label fw-bold text-muted">
-              <i class="bi bi-cash-coin"></i> Vuelto entregado:
+            <label class="form-label fw-bold">
+              <i class="bi bi-bag-check"></i>
+              Bandeja de entrega
             </label>
-            <div id="panel-vuelto" class="border rounded p-3 bg-light">
-              <span class="text-muted">S/ 0.00</span>
+            <div id="bandeja-entrega" class="output-box">
+              Vacía.
             </div>
           </div>
-
         </div>
       </div>
+    </section>
+
+    <section id="afd-section" class="afd-section mt-4 d-none">
+      <div class="academic-panel">
+        <h2>Planteamiento del problema</h2>
+        <p>
+          Se desea modelar el funcionamiento de una máquina expendedora mediante un
+          Autómata Finito Determinista. La máquina vende seis productos, acepta únicamente
+          monedas peruanas de S/0.10, S/0.20, S/0.50, S/1.00, S/2.00 y S/5.00, acumula
+          el monto ingresado y permite recoger el producto solo cuando el pago ha sido
+          completado. Si el monto ingresado supera el precio, el sistema calcula el cambio
+          usando la menor cantidad posible de monedas.
+        </p>
+
+        <h2>Definición formal del AFD</h2>
+        <p>
+          El autómata se define como M = (Q, Σ, δ, q0, F).
+        </p>
+
+        <ul>
+          <li><strong>Q:</strong> {INICIO, PRODUCTO_SELECCIONADO, ACUMULANDO_DINERO, PAGO_COMPLETADO, CAMBIO_CALCULADO, PRODUCTO_LISTO, ENTREGA_PRODUCTO, ENTREGA_CAMBIO, REINICIO}</li>
+          <li><strong>Σ:</strong> {seleccionar_producto, moneda_0_10, moneda_0_20, moneda_0_50, moneda_1_00, moneda_2_00, moneda_5_00, recoger_producto, cancelar}</li>
+          <li><strong>δ:</strong> función de transición que determina el siguiente estado según el estado actual y la entrada recibida.</li>
+          <li><strong>q0:</strong> INICIO.</li>
+          <li><strong>F:</strong> {PRODUCTO_LISTO, ENTREGA_PRODUCTO, ENTREGA_CAMBIO}.</li>
+        </ul>
+
+        <p class="note">
+          Nota académica: el AFD controla los estados del proceso. El cálculo exacto del
+          monto acumulado y del cambio requiere memoria numérica adicional, por lo que esa
+          parte corresponde a la lógica del programa. El autómata representa el flujo de
+          control de la máquina.
+        </p>
+      </div>
+
+      <div class="row g-4 mt-1">
+  <div class="col-12">
+    <div class="academic-panel">
+      <h2>Grafo de estados</h2>
+      <div id="mermaid-container" class="mermaid-box"></div>
     </div>
-
   </div>
-</div>
 
-<footer class="text-center text-muted py-3">
-  <small>Proyecto académico · Simulación de Máquina de Estados Finitos (FSM)</small>
-</footer>
+  <div class="col-12">
+    <div class="academic-panel">
+      <h2>Tabla completa de transiciones</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered table-sm align-middle transition-table">
+                <thead>
+  <tr>
+    <th rowspan="2">Estado<br><small>cantidad depositada</small></th>
+    <th colspan="6">Moneda insertada entrada</th>
+    <th rowspan="2">Recoger producto</th>
+    <th rowspan="2">Cancelar</th>
+  </tr>
+  <tr>
+    <th>S/ 0.10</th>
+    <th>S/ 0.20</th>
+    <th>S/ 0.50</th>
+    <th>S/ 1.00</th>
+    <th>S/ 2.00</th>
+    <th>S/ 5.00</th>
+  </tr>
+</thead>
+<tbody id="tabla-transiciones"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+      <div class="academic-panel mt-4">
+        <h2>Casos de prueba</h2>
+        <div class="table-responsive">
+          <table class="table table-striped table-bordered align-middle">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Precio</th>
+                <th>Monedas ingresadas</th>
+                <th>Monto</th>
+                <th>Cambio</th>
+                <th>Monedas entregadas</th>
+                <th>Estado final</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Agua</td>
+                <td>S/ 2.00</td>
+                <td>S/1.00 + S/1.00</td>
+                <td>S/ 2.00</td>
+                <td>S/ 0.00</td>
+                <td>No hay cambio</td>
+                <td>INICIO</td>
+              </tr>
+              <tr>
+                <td>Gaseosa</td>
+                <td>S/ 3.50</td>
+                <td>S/5.00</td>
+                <td>S/ 5.00</td>
+                <td>S/ 1.50</td>
+                <td>1 moneda de S/1.00, 1 moneda de S/0.50</td>
+                <td>INICIO</td>
+              </tr>
+              <tr>
+                <td>Jugo</td>
+                <td>S/ 3.00</td>
+                <td>S/2.00 + S/1.00</td>
+                <td>S/ 3.00</td>
+                <td>S/ 0.00</td>
+                <td>No hay cambio</td>
+                <td>INICIO</td>
+              </tr>
+              <tr>
+                <td>Café</td>
+                <td>S/ 2.80</td>
+                <td>S/2.00 + S/1.00</td>
+                <td>S/ 3.00</td>
+                <td>S/ 0.20</td>
+                <td>1 moneda de S/0.20</td>
+                <td>INICIO</td>
+              </tr>
+              <tr>
+                <td>Energizante</td>
+                <td>S/ 4.70</td>
+                <td>S/5.00</td>
+                <td>S/ 5.00</td>
+                <td>S/ 0.30</td>
+                <td>1 moneda de S/0.20, 1 moneda de S/0.10</td>
+                <td>INICIO</td>
+              </tr>
+              <tr>
+                <td>Té</td>
+                <td>S/ 1.60</td>
+                <td>S/1.00 + S/0.50 + S/0.20</td>
+                <td>S/ 1.70</td>
+                <td>S/ 0.10</td>
+                <td>1 moneda de S/0.10</td>
+                <td>INICIO</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
 
-<!-- Scripts propios (orden importa) -->
-<script src="js/productos.js"></script>
-<script src="js/vuelto.js"></script>
-<script src="js/app.js"></script>
+  <footer class="text-center py-3 text-light-emphasis">
+    <small>Proyecto académico - Matemática Discreta - AFD</small>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+
+  <script src="js/productos.js"></script>
+  <script src="js/vuelto.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
